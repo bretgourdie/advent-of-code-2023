@@ -1,10 +1,28 @@
-﻿using System.Text;
+﻿using System.Reflection.Metadata.Ecma335;
+using System.Text;
 using advent_of_code_2017;
 
 namespace advent_of_code_2023.Day01;
+
 internal class Day01 : AdventSolution
 {
-    protected override long part1Work(string[] input)
+
+    private IDictionary<string, long> wordToNumber = new Dictionary<string, long>()
+    {
+        { "one", 1 },
+        { "two", 2 },
+        { "three", 3 },
+        { "four", 4},
+        { "five", 5},
+        { "six", 6},
+        { "seven", 7},
+        { "eight", 8},
+        { "nine", 9}
+    };
+
+    private long work(
+        string[] input,
+        Func<int, string, string> getNumber)
     {
         long sum = 0;
 
@@ -13,36 +31,69 @@ internal class Day01 : AdventSolution
             string firstDigit = String.Empty;
             string lastDigit = String.Empty;
 
-            foreach (var letterChar in line)
+            for (int ii = 0; ii < line.Length; ii++)
             {
-                var letterString = letterChar.ToString();
+                var number = getNumber(ii, line);
 
-                if (long.TryParse(letterString, out long number))
+                if (number != String.Empty)
                 {
                     if (firstDigit == String.Empty)
                     {
-                        firstDigit = letterString;
+                        firstDigit = number;
                     }
 
-                    lastDigit = letterString;
+                    lastDigit = number;
                 }
             }
 
-            var combinedDigits = long.Parse(firstDigit + lastDigit);
+            if (firstDigit != String.Empty && lastDigit != String.Empty)
+            {
+                var combinedDigits = long.Parse(firstDigit + lastDigit);
 
-            sum += combinedDigits;
+                sum += combinedDigits;
+            }
         }
 
         return sum;
     }
 
-    protected override long part1ExampleExpected => 142;
-    protected override long part1InputExpected => 55208;
-    protected override long part2Work(string[] input)
+    private string getRealNumber(int index, string line)
     {
-        throw new NotImplementedException();
+        var first = line.Substring(index).First().ToString();
+        if (long.TryParse(first, out long number))
+        {
+            return first;
+        }
+
+        return String.Empty;
     }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    private string getRealOrWrittenNumber(int index, string line)
+    {
+        var realNumber = getRealNumber(index, line);
+        if (realNumber != String.Empty)
+        {
+            return realNumber;
+        }
+
+        var potential = line.Substring(index);
+        var starts = wordToNumber.Keys.Where(word => potential.StartsWith(word));
+
+        var start = starts.SingleOrDefault();
+        if (start != null)
+        {
+            return wordToNumber[start].ToString();
+        }
+
+        return String.Empty;
+    }
+
+    protected override long part1Work(string[] input) => work(input, getRealNumber);
+
+    protected override long part1ExampleExpected => 209;
+    protected override long part1InputExpected => 55208;
+    protected override long part2Work(string[] input) => work(input, getRealOrWrittenNumber);
+
+    protected override long part2ExampleExpected => 281;
+    protected override long part2InputExpected => 54578;
 }
