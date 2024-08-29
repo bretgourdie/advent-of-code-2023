@@ -7,22 +7,13 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
     private const string example = "example";
     private const string input = "input";
 
-    [SetUp]
-    public void Setup()
-    {
-        fileCheckAssertions();
-    }
-
-    private void fileCheckAssertions()
-    {
-        Assert.That(File.Exists(getFilename(example)), "Example file does not exist");
-        Assert.That(File.Exists(getFilename(input)), "Input file does not exist");
-    }
-
     [Test]
     [TestCase(example)]
     [TestCase(input)]
-    public void Part1(string file) =>
+    public void Part1(string file)
+    {
+        Assert.That(File.Exists(getFilename(file)), $"{file} file does not exist");
+
         Assert.That(() =>
         part(
             file,
@@ -30,12 +21,16 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
             part1ExampleExpected,
             part1InputExpected),
         Throws.Nothing);
+    }
 
 
     [Test]
     [TestCase(example)]
     [TestCase(input)]
-    public void Part2(string file) =>
+    public void Part2(string file)
+    {
+        Assert.That(File.Exists(getFilename(file)), $"{file} file does not exist");
+
         Assert.That(() =>
         part(
             file,
@@ -43,6 +38,7 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
             part2ExampleExpected,
             part2InputExpected),
         Throws.Nothing);
+    }
 
     protected abstract TPart1 part1Work(string[] input);
 
