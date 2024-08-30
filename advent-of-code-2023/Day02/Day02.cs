@@ -1,4 +1,5 @@
-﻿using advent_of_code_2017;
+﻿using System.Runtime.CompilerServices;
+using advent_of_code_2017;
 
 namespace advent_of_code_2023.Day02;
 internal class Day02 : AdventSolution
@@ -10,7 +11,12 @@ internal class Day02 : AdventSolution
         { "blue", 14 }
     };
 
-    protected override long part1Work(string[] input)
+    protected override long part1Work(string[] input) =>
+        work(input, returnPossibleGameId);
+
+    private long work(
+        string[] input,
+        Func<IList<string>, long, long> sumFunction)
     {
         long sum = 0;
 
@@ -22,13 +28,20 @@ internal class Day02 : AdventSolution
 
             var subsetGameSplit = gameAndCubesSplit[1].Split("; ");
 
-            if (isPossibleGame(subsetGameSplit))
-            {
-                sum += long.Parse(gameAndId[1]);
-            }
+            sum += sumFunction(subsetGameSplit, long.Parse(gameAndId[1]));
         }
 
         return sum;
+    }
+
+    private long returnPossibleGameId(IList<string> subsetGames, long gameId)
+    {
+        if (isPossibleGame(subsetGames))
+        {
+            return gameId;
+        }
+
+        return 0;
     }
 
     private bool isPossibleGame(IList<string> subsetGames)
@@ -54,13 +67,43 @@ internal class Day02 : AdventSolution
         return true;
     }
 
-    protected override long part1ExampleExpected => 8;
-    protected override long part1InputExpected => 2348;
-    protected override long part2Work(string[] input)
+    private long returnMinimumPower(IList<string> subsetGames, long gameId)
     {
-        throw new NotImplementedException();
+        IDictionary<string, int> colorToMinimum = new Dictionary<string, int>();
+
+        foreach (var subsetGame in subsetGames)
+        {
+            var cubesSplit = subsetGame.Split(", ");
+
+            foreach (var cubes in cubesSplit)
+            {
+                var numberAndColorSplit = cubes.Split(" ");
+
+                var number = int.Parse(numberAndColorSplit[0]);
+                var color = numberAndColorSplit[1];
+
+                if (!colorToMinimum.ContainsKey(color))
+                {
+                    colorToMinimum[color] = number;
+                }
+
+                else
+                {
+                    colorToMinimum[color] = Math.Max(colorToMinimum[color], number);
+                }
+            }
+        }
+
+        long power = colorToMinimum.Aggregate(1, (x, y) => x * y.Value);
+        return power;
     }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    protected override long part1ExampleExpected => 8;
+    protected override long part1InputExpected => 2348;
+
+    protected override long part2Work(string[] input) =>
+        work(input, returnMinimumPower);
+
+    protected override long part2ExampleExpected => 2286;
+    protected override long part2InputExpected => 76008;
 }
