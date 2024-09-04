@@ -1,3 +1,4 @@
+using System.Reflection;
 using NUnit.Framework;
 
 namespace advent_of_code_2017;
@@ -7,12 +8,26 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
     private const string example = "example";
     private const string input = "input";
 
+    private Assembly executingAssembly;
+    private IList<string> manifestResourceNames;
+    private string currentNamespace;
+
+    [SetUp]
+    public void SetUp()
+    {
+        executingAssembly = Assembly.GetExecutingAssembly();
+        manifestResourceNames = executingAssembly.GetManifestResourceNames();
+        currentNamespace = this.GetType().Namespace;
+
+        Assert.That(currentNamespace, Is.Not.Null.And.Not.Empty);
+    }
+
     [Test]
     [TestCase(example)]
     [TestCase(input)]
     public void Part1(string file)
     {
-        Assert.That(File.Exists(getFilename(file)), $"{file} file does not exist");
+        Assert.That(embeddedFileExists(file), $"{file} embedded file does not exist");
 
         Assert.That(() =>
         part(
@@ -29,7 +44,7 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
     [TestCase(input)]
     public void Part2(string file)
     {
-        Assert.That(File.Exists(getFilename(file)), $"{file} file does not exist");
+        Assert.That(embeddedFileExists(file), $"{file} embedded file does not exist");
 
         Assert.That(() =>
         part(
@@ -80,17 +95,31 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
 
     private string[] getInput(string file)
     {
-        return File.ReadAllLines(
-            getFilename(file)
-        );
+        var stream = executingAssembly.GetManifestResourceStream(getEmbeddedFilename(file));
+        Assert.That(stream, Is.Not.Null);
+
+        var lines = new List<string>();
+        using (var reader = new StreamReader(stream))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                lines.Add(line);
+            }
+        }
+
+        return lines.ToArray();
     }
 
-    private string getFilename(string file)
+    private string getEmbeddedFilename(string file)
     {
-        return
-            this.GetType().Name
-            + Path.DirectorySeparatorChar
-            + file
-            + ".txt";
+        return String.Concat(
+            currentNamespace,
+            ".",
+            file,
+            ".txt");
     }
+
+    private bool embeddedFileExists(string file) =>
+        manifestResourceNames.Contains(getEmbeddedFilename(file));
 }
