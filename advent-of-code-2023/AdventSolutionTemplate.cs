@@ -25,10 +25,7 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
     [Test]
     [TestCase(example)]
     [TestCase(input)]
-    public void Part1(string file)
-    {
-        Assert.That(embeddedFileExists(file), $"{file} embedded file does not exist");
-
+    public void Part1(string file) =>
         Assert.That(() =>
         part(
             file,
@@ -36,16 +33,12 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
             part1ExampleExpected,
             part1InputExpected),
         Throws.Nothing);
-    }
 
 
     [Test]
     [TestCase(example)]
     [TestCase(input)]
-    public void Part2(string file)
-    {
-        Assert.That(embeddedFileExists(file), $"{file} embedded file does not exist");
-
+    public void Part2(string file) =>
         Assert.That(() =>
         part(
             file,
@@ -53,7 +46,6 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
             part2ExampleExpected,
             part2InputExpected),
         Throws.Nothing);
-    }
 
     protected abstract TPart1 part1Work(string[] input);
 
@@ -70,6 +62,8 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
         T exampleExpected,
         T inputExpected)
     {
+        Assert.That(embeddedFileExists(file), $"{file} embedded file does not exist");
+
         var answer = workMethod.Invoke(getInput(file));
 
         switch (file)
