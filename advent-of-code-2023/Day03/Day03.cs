@@ -1,19 +1,30 @@
 ﻿using advent_of_code_2017;
 using System.Numerics;
-using System.Text;
 
 namespace advent_of_code_2023.Day03;
 internal class Day03 : AdventSolution
 {
-    protected override long part1Work(string[] input)
+    protected override long part1Work(string[] input) =>
+        work(input,
+            findAllSymbols,
+            getSumOfAllSymbols);
+
+    private long work(
+        string[] input,
+        Func<char, bool> isLookingForSymbol,
+        Func<ISet<WholeNumber>, long> getSum)
     {
-        var symbolCoordinates = findSymbols(input);
+        var symbolCoordinates = findSymbols(input, isLookingForSymbol);
 
         long sum = 0;
 
         foreach (var symbolCoordinate in symbolCoordinates)
         {
-            sum += getSum(input, symbolCoordinate.X, symbolCoordinate.Y);
+            sum += getSymbolSum(
+                input,
+                symbolCoordinate.X,
+                symbolCoordinate.Y,
+                getSum);
         }
 
         return sum;
@@ -21,15 +32,18 @@ internal class Day03 : AdventSolution
 
     protected override long part1ExampleExpected => 4361;
     protected override long part1InputExpected => 528819;
-    protected override long part2Work(string[] input)
-    {
-        throw new NotImplementedException();
-    }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    protected override long part2Work(string[] input) =>
+        work(input,
+            findStars,
+            getGearRatio);
 
-    private IList<Vector2> findSymbols(string[] input)
+    protected override long part2ExampleExpected => 467835;
+    protected override long part2InputExpected => 80403602;
+
+    private IList<Vector2> findSymbols(
+        string[] input,
+        Func<char, bool> isLookingForSymbol)
     {
         var coords = new List<Vector2>();
 
@@ -39,8 +53,9 @@ internal class Day03 : AdventSolution
             {
                 var letter = input[ii][jj];
 
-                if (!int.TryParse(letter.ToString(), out int number)
-                    && letter != '.')
+                if (!isNumber(letter)
+                    && letter != '.'
+                    && isLookingForSymbol(letter))
                 {
                     coords.Add(new Vector2(jj, ii));
                 }
@@ -50,10 +65,30 @@ internal class Day03 : AdventSolution
         return coords;
     }
 
-    private long getSum(string[] input, float startXf, float startYf)
+    private long getGearRatio(
+        ISet<WholeNumber> numbers)
     {
-        IDictionary<Vector2, long> coordToNumber = 
-            new Dictionary<Vector2, long>();
+        if (numbers.Count == 2)
+            return numbers.First().Number * numbers.Skip(1).First().Number;
+
+        return 0;
+    }
+
+    private bool findStars(char letter) => letter == '*';
+
+    private bool findAllSymbols(char letter) => true;
+
+    private long getSumOfAllSymbols(
+        ISet<WholeNumber> numbers) =>
+        numbers.Sum(x => x.Number);
+
+    private long getSymbolSum(
+        string[] input,
+        float startXf,
+        float startYf,
+        Func<ISet<WholeNumber>, long> getSum)
+    {
+        ISet<WholeNumber> numbers = new HashSet<WholeNumber>();
 
         int startX = (int)startXf;
         int startY = (int)startYf;
@@ -63,31 +98,28 @@ internal class Day03 : AdventSolution
         int maxX = Math.Min(input[startY].Length, startX + 1 + 1);
         int maxY = Math.Min(input.Length, startY + 1 + 1);
 
-        ISet<Vector2> usedCoords = new HashSet<Vector2>();
-
         for (int y = minY; y < maxY; y++)
         {
             for (int x = minX; x < maxX; x++)
             {
                 var letter = input[y][x];
 
-                if (int.TryParse(letter.ToString(), out int number))
+                if (isNumber(letter))
                 {
-                    var wholeNumber = findNumber(input, x, y);
-                    var start = new Vector2(wholeNumber.StartX, wholeNumber.StartY);
+                    var number = findWholeNumber(input, x, y);
 
-                    if (!coordToNumber.ContainsKey(start))
+                    if (!numbers.Contains(number))
                     {
-                        coordToNumber[start] = wholeNumber.Number;
+                        numbers.Add(number);
                     }
                 }
             }
         }
 
-        return coordToNumber.Sum(x => x.Value);
+        return getSum(numbers);
     }
 
-    private ExtractedNumber findNumber(string[] input, int x, int y)
+    private WholeNumber findWholeNumber(string[] input, int x, int y)
     {
         int start = x;
         while (start - 1 >= 0 && isNumber(input[y][start - 1]))
@@ -103,7 +135,7 @@ internal class Day03 : AdventSolution
 
         var wholeNumber = input[y].Substring(start, end - start);
 
-        return new ExtractedNumber(
+        return new WholeNumber(
             start,
             y,
             long.Parse(wholeNumber)
@@ -111,21 +143,19 @@ internal class Day03 : AdventSolution
     }
 
     private bool isNumber(char letter) =>
-        int.TryParse(letter.ToString(), out int number);
+        int.TryParse(letter.ToString(), out _);
 
-    private struct ExtractedNumber
+    private struct WholeNumber
     {
-        public readonly int StartX;
-        public readonly int StartY;
+        public readonly Vector2 Coordinate;
         public readonly long Number;
 
-        public ExtractedNumber(
+        public WholeNumber(
             int x,
             int y,
             long number)
         {
-            StartX = x;
-            StartY = y;
+            Coordinate = new Vector2(x, y);
             Number = number;
         }
     }
