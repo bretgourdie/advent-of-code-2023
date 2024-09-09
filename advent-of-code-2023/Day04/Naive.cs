@@ -3,7 +3,7 @@ internal class Naive : IScorable
 {
     private long sum = 0;
 
-    public void RecordScore(string cardNumber, long score)
+    public void RecordScore(long cardNumber, long score)
     {
         sum += (long)Math.Pow(2, score - 1);
     }

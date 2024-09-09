@@ -25,7 +25,7 @@ internal class Day04 : AdventSolution
 
             if (intersect.Any())
             {
-                scoring.RecordScore(cardNumberStr, intersect.Count());
+                scoring.RecordScore(long.Parse(cardNumberStr), intersect.Count());
             }
         }
 
@@ -40,11 +40,10 @@ internal class Day04 : AdventSolution
 
     protected override long part1ExampleExpected => 13;
     protected override long part1InputExpected => 23673;
-    protected override long part2Work(string[] input)
-    {
-        throw new NotImplementedException();
-    }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    protected override long part2Work(string[] input) =>
+        work(input, new Instruction(input));
+
+    protected override long part2ExampleExpected => 30;
+    protected override long part2InputExpected => 12263631;
 }
