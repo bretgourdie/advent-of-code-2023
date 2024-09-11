@@ -3,9 +3,14 @@
 namespace advent_of_code_2023.Day05;
 internal class Day05 : AdventSolution
 {
-    protected override long part1Work(string[] input)
+    protected override long part1Work(string[] input) =>
+        work(input, seedsAsPoints);
+
+    private long work(
+        string[] input,
+        Func<IEnumerable<long>, IEnumerable<long>> seedParseFunction)
     {
-        var seeds = parseSeeds(input);
+        var seeds = parseSeeds(input, seedParseFunction);
         var rangeMaps = parseMaps(input);
         var minLocation = long.MaxValue;
 
@@ -27,12 +32,31 @@ internal class Day05 : AdventSolution
         return minLocation;
     }
 
-    private IList<long> parseSeeds(string[] input)
+    private IEnumerable<long> parseSeeds(
+        string[] input,
+        Func<IEnumerable<long>, IEnumerable<long>> parseSeedNumbersFunction)
     {
         var seedsLine = input.First();
         var seedsAndNumbers = seedsLine.Split(": ");
-        var seedNumbers = seedsAndNumbers[1].Split(" ");
-        return new List<long>(seedNumbers.Select(x => long.Parse(x)));
+        var seedNumbersStr = seedsAndNumbers[1].Split(" ");
+        var seedNumbers = seedNumbersStr.Select(x => long.Parse(x));
+        return parseSeedNumbersFunction(seedNumbers);
+    }
+
+    private IEnumerable<long> seedsAsPoints(IEnumerable<long> seeds) => seeds;
+
+    private IEnumerable<long> seedsAsRange(IEnumerable<long> seedRanges)
+    {
+        for (int ii = 0; ii < seedRanges.Count(); ii += 2)
+        {
+            var start = seedRanges.ElementAt(ii);
+            var length = seedRanges.ElementAt(ii + 1);
+
+            for (long jj = 0; jj < length; jj++)
+            {
+                yield return jj + start;
+            }
+        }
     }
 
     private IDictionary<string, RangeMap> parseMaps(string[] input)
@@ -78,11 +102,10 @@ internal class Day05 : AdventSolution
 
     protected override long part1ExampleExpected => 35;
     protected override long part1InputExpected => 318728750;
-    protected override long part2Work(string[] input)
-    {
-        throw new NotImplementedException();
-    }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    protected override long part2Work(string[] input) =>
+        work(input, seedsAsRange);
+
+    protected override long part2ExampleExpected => 46;
+    protected override long part2InputExpected => -1;
 }
