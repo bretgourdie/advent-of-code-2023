@@ -8,33 +8,56 @@ internal class Day05 : AdventSolution
 
     private long work(
         string[] input,
-        Func<IEnumerable<long>, IEnumerable<long>> seedParseFunction)
+        Func<IEnumerable<long>, IList<long>> seedParseFunction)
     {
         var seeds = parseSeeds(input, seedParseFunction);
         var rangeMaps = parseMaps(input);
         var minLocation = long.MaxValue;
+        const string finalSourceToDestination = "humidity";
 
-        foreach (var seed in seeds)
+        var locations = rangeMaps[finalSourceToDestination];
+        var locationsSet = getSortedLocations(locations);
+        var locationsSetSorted = locationsSet.OrderBy(x => x);
+
+        foreach (var location in locationsSetSorted)
         {
-            var value = seed;
-            var map = "seed";
+            var value = location;
+            var map = finalSourceToDestination;
 
-            while (map != "location")
+            while (map != "seed" && rangeMaps.ContainsKey(map) && rangeMaps[map].DestinationInRange(value))
             {
-                var rangeMap = rangeMaps[map];
-                value = rangeMap.GetDestination(value);
-                map = rangeMap.Destination;
-            }
+                map = rangeMaps[map].Source;
+                var newValue = rangeMaps[map].GetSource(value);
 
-            minLocation = Math.Min(minLocation, value);
+                if (newValue == value) break;
+
+                if (map == "seed") return value;
+
+                value = newValue;
+            }
         }
 
-        return minLocation;
+        return long.MaxValue;
     }
 
-    private IEnumerable<long> parseSeeds(
+    private ISet<long> getSortedLocations(RangeMap locations)
+    {
+        var set = new SortedSet<long>();
+
+        foreach (var mapping in locations.Mappings)
+        {
+            for (long ii = 0; ii < mapping.RangeLength; ii++)
+            {
+                set.Add(ii + mapping.DestinationRangeStart);
+            }
+        }
+
+        return set;
+    }
+
+    private IList<long> parseSeeds(
         string[] input,
-        Func<IEnumerable<long>, IEnumerable<long>> parseSeedNumbersFunction)
+        Func<IEnumerable<long>, IList<long>> parseSeedNumbersFunction)
     {
         var seedsLine = input.First();
         var seedsAndNumbers = seedsLine.Split(": ");
@@ -43,10 +66,12 @@ internal class Day05 : AdventSolution
         return parseSeedNumbersFunction(seedNumbers);
     }
 
-    private IEnumerable<long> seedsAsPoints(IEnumerable<long> seeds) => seeds;
+    private IList<long> seedsAsPoints(IEnumerable<long> seeds) => seeds.ToList();
 
-    private IEnumerable<long> seedsAsRange(IEnumerable<long> seedRanges)
+    private IList<long> seedsAsRange(IEnumerable<long> seedRanges)
     {
+        var list = new List<long>();
+
         for (int ii = 0; ii < seedRanges.Count(); ii += 2)
         {
             var start = seedRanges.ElementAt(ii);
@@ -54,9 +79,11 @@ internal class Day05 : AdventSolution
 
             for (long jj = 0; jj < length; jj++)
             {
-                yield return jj + start;
+                list.Add(jj + start);
             }
         }
+
+        return list;
     }
 
     private IDictionary<string, RangeMap> parseMaps(string[] input)

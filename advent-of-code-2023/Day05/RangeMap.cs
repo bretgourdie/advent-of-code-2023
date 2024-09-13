@@ -4,7 +4,7 @@ internal class RangeMap
     public readonly string Source;
     public readonly string Destination;
 
-    private readonly IList<Mapping> mappings;
+    public readonly IList<Mapping> Mappings;
 
     public RangeMap(
         string source,
@@ -13,7 +13,7 @@ internal class RangeMap
         Source = source;
         Destination = destination;
 
-        mappings = new List<Mapping>();
+        Mappings = new List<Mapping>();
     }
 
     public void AddMapping(
@@ -21,12 +21,22 @@ internal class RangeMap
         long sourceRangeStart,
         long rangeLength)
     {
-        mappings.Add(
+        Mappings.Add(
             new Mapping(
                 destinationRangeStart,
                 sourceRangeStart,
                 rangeLength));
     }
+
+    public bool DestinationInRange(
+        long trying) =>
+        Mappings.Any(x => destinationInRange(trying, x));
+
+    private bool destinationInRange(
+        long trying,
+        Mapping mapping) =>
+        mapping.DestinationRangeStart <= trying
+        && trying < mapping.DestinationRangeStart + mapping.RangeLength;
 
     private bool sourceInRange(
         long trying,
@@ -36,7 +46,7 @@ internal class RangeMap
 
     public long GetDestination(long source)
     {
-        foreach (var mapping in mappings)
+        foreach (var mapping in Mappings)
         {
             if (sourceInRange(source, mapping))
             {
@@ -49,7 +59,22 @@ internal class RangeMap
         return source;
     }
 
-    private struct Mapping
+    public long GetSource(long destination)
+    {
+        foreach (var mapping in Mappings)
+        {
+            if (destinationInRange(destination, mapping))
+            {
+                return
+                    mapping.SourceRangeStart
+                    + (destination - mapping.DestinationRangeStart);
+            }
+        }
+
+        return destination;
+    }
+
+    public struct Mapping
     {
         public readonly long DestinationRangeStart;
         public readonly long SourceRangeStart;
