@@ -2,5 +2,4 @@
 internal interface INavigationStrategy
 {
     IList<string> GetStart(IDictionary<string, IList<string>> map);
-    bool IsDone(IList<string> currentLocations);
 }

@@ -20,33 +20,77 @@ internal class Day08 : AdventSolution
         var locations = navigation.GetStart(map);
         long steps = 0;
 
-        while (!navigation.IsDone(locations))
+        var cycleDetectors = new List<CycleDetection>();
+        foreach (var location in locations)
+        {
+            cycleDetectors.Add(new CycleDetection());
+        }
+
+        while (!IsDone(locations, cycleDetectors))
         {
             for (int ii = 0; ii < locations.Count; ii++)
             {
-                var location = locations[ii];
-
-                var currentDirection = (int)(steps % directions.Length);
-                var direction = directions[currentDirection];
-
-                var currentMap = map[location];
-
-                if (direction == 'L')
+                var cycleDetector = cycleDetectors[ii];
+                if (!cycleDetector.CycleDetected)
                 {
-                    locations[ii] = currentMap[0];
-                }
+                    var location = locations[ii];
 
-                else if (direction == 'R')
-                {
-                    locations[ii] = currentMap[1];
+                    var currentDirection = (int)(steps % directions.Length);
+                    var direction = directions[currentDirection];
+
+                    var currentMap = map[location];
+
+                    cycleDetector.Record(location, currentMap[0], currentMap[1], currentDirection);
+
+                    if (direction == 'L')
+                    {
+                        locations[ii] = currentMap[0];
+                    }
+
+                    else if (direction == 'R')
+                    {
+                        locations[ii] = currentMap[1];
+                    }
                 }
             }
 
             steps += 1;
         }
 
-        return steps;
+        if (cycleDetectors.All(x => x.CycleDetected))
+        {
+            return LCM(
+                cycleDetectors
+                    .Select(x => (long)x.Length)
+                    .ToList());
+        }
+
+        else
+        {
+            return steps;
+        }
     }
+
+    private long LCM(IList<long> numbers)
+    {
+        return numbers.Aggregate(lcm);
+    }
+
+    private long lcm(long a, long b)
+    {
+        return Math.Abs(a * b) / GCD(a, b);
+    }
+
+    private long GCD(long a, long b)
+    {
+        return b == 0 ? a : GCD(b, a % b);
+    }
+
+    public bool IsDone(
+        IList<string> locations,
+        IList<CycleDetection> cycleDetectors) =>
+        locations.All(x => x.EndsWith("Z"))
+        || cycleDetectors.All(x => x.CycleDetected);
 
     private IDictionary<string, IList<string>> getMap(string[] input)
     {
