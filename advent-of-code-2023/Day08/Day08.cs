@@ -1,41 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using advent_of_code_2017;
+﻿using advent_of_code_2017;
 
 namespace advent_of_code_2023.Day08;
 internal class Day08 : AdventSolution
 {
-    protected override long part1Work(string[] input)
+    protected new static string[] example1Filename() => new[] { "example1" };
+    protected new static string[] example2Filename() => new[] { "example2" };
+
+    protected override long part1Work(string[] input) =>
+        work(input, new Living());
+
+    private long work(
+        string[] input,
+        INavigationStrategy navigation)
     {
         var directions = input.First();
 
         var map = getMap(input);
 
-        var location = "AAA";
-        var destination = "ZZZ";
+        var locations = navigation.GetStart(map);
         long steps = 0;
 
-        while (location != destination)
+        while (!navigation.IsDone(locations))
         {
-            var currentDirection = (int)(steps % directions.Length);
-            var direction = directions[currentDirection];
+            for (int ii = 0; ii < locations.Count; ii++)
+            {
+                var location = locations[ii];
+
+                var currentDirection = (int)(steps % directions.Length);
+                var direction = directions[currentDirection];
+
+                var currentMap = map[location];
+
+                if (direction == 'L')
+                {
+                    locations[ii] = currentMap[0];
+                }
+
+                else if (direction == 'R')
+                {
+                    locations[ii] = currentMap[1];
+                }
+            }
+
             steps += 1;
-
-            var currentMap = map[location];
-
-            if (direction == 'L')
-            {
-                location = currentMap[0];
-            }
-
-            else if (direction == 'R')
-            {
-                location = currentMap[1];
-            }
         }
 
         return steps;
@@ -63,11 +70,10 @@ internal class Day08 : AdventSolution
 
     protected override long part1ExampleExpected => 6;
     protected override long part1InputExpected => 15989;
-    protected override long part2Work(string[] input)
-    {
-        throw new NotImplementedException();
-    }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    protected override long part2Work(string[] input) =>
+        work(input, new Ghost());
+
+    protected override long part2ExampleExpected => 6;
+    protected override long part2InputExpected => -1;
 }
