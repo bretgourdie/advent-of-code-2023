@@ -1,5 +1,4 @@
 using System.Reflection;
-using NUnit.Framework;
 
 namespace advent_of_code_2017;
 
@@ -12,6 +11,9 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
     private IList<string> manifestResourceNames;
     private string currentNamespace;
 
+    protected static string[] example1Filename() => new [] {"example"};
+    protected static string[] example2Filename() => new [] {"example"};
+
     [SetUp]
     public void SetUp()
     {
@@ -23,7 +25,8 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
     }
 
     [Test]
-    [TestCase(example)]
+    [TestCaseSource(nameof(example1Filename))]
+    [TestCaseSource(nameof(example2Filename))]
     [TestCase(input)]
     public void Part1(string file) =>
         Assert.That(() =>
@@ -36,7 +39,8 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
 
 
     [Test]
-    [TestCase(example)]
+    [TestCaseSource(nameof(example1Filename))]
+    [TestCaseSource(nameof(example2Filename))]
     [TestCase(input)]
     public void Part2(string file) =>
         Assert.That(() =>
@@ -66,16 +70,19 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
 
         var answer = workMethod.Invoke(getInput(file));
 
-        switch (file)
+        if (file.Contains(example))
         {
-            case example:
-                assertions(exampleExpected, answer);
-                break;
-            case input:
-                assertions(inputExpected, answer);
-                break;
-            default:
-                throw new NotImplementedException();
+            assertions(exampleExpected, answer);
+        }
+
+        else if (file == input)
+        {
+            assertions(inputExpected, answer);
+        }
+
+        else
+        {
+            throw new NotImplementedException();
         }
     }
 
