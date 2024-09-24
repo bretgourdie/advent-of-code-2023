@@ -1,11 +1,12 @@
 ﻿namespace advent_of_code_2023.Day08;
 internal class CycleDetection
 {
-    public bool CycleDetected = false;
-    public bool CycleFound = false;
+    private bool cycleDetected = false;
+    public bool ZInCycleDetected = false;
     private readonly ISet<Instance> _instancesHash;
     private readonly List<Instance> _instancesList;
     public int Length { get; private set; }
+    public int Start { get; private set; }
 
     public CycleDetection()
     {
@@ -24,27 +25,29 @@ internal class CycleDetection
         if (!_instancesHash.Contains(instance))
         {
             _instancesHash.Add(instance);
-            _instancesList.Add(instance);
         }
 
         else
         {
-            string start = null;
-            int ii = _instancesList.Count - 1;
-            int zEnd = -1;
-            do
-            {
-                start = _instancesList[--ii].from;
-                if (start.EndsWith("Z"))
-                {
-                    zEnd = Math.Max(zEnd, ii);
-                }
-            } while (from != start);
-
-            int length = _instancesList.Count - ii + 1;
-            int actualZ = length + zEnd;
-            Length = actualZ;
+            cycleDetected = true;
         }
+
+        if (cycleDetected && !ZInCycleDetected)
+        {
+            if (from.EndsWith("Z"))
+            {
+                ZInCycleDetected = true;
+                Start = _instancesList.Count - 1;
+
+                for (; Start >= 0; Start--)
+                {
+                    if (_instancesList[Start] == instance) break;
+                    Length += 1;
+                }
+            }
+        }
+
+        _instancesList.Add(instance);
     }
 
     private record Instance(string from, string left, string right, int directionIndex);

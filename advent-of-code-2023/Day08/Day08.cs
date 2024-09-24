@@ -31,7 +31,7 @@ internal class Day08 : AdventSolution
             for (int ii = 0; ii < locations.Count; ii++)
             {
                 var cycleDetector = cycleDetectors[ii];
-                if (!cycleDetector.CycleDetected)
+                if (!cycleDetector.ZInCycleDetected)
                 {
                     var location = locations[ii];
 
@@ -57,7 +57,7 @@ internal class Day08 : AdventSolution
             steps += 1;
         }
 
-        if (cycleDetectors.All(x => x.CycleDetected))
+        if (cycleDetectors.All(x => x.ZInCycleDetected))
         {
             return LCM(
                 cycleDetectors
@@ -90,7 +90,7 @@ internal class Day08 : AdventSolution
         IList<string> locations,
         IList<CycleDetection> cycleDetectors) =>
         locations.All(x => x.EndsWith("Z"))
-        || cycleDetectors.All(x => x.CycleDetected);
+        || cycleDetectors.All(x => x.ZInCycleDetected);
 
     private IDictionary<string, IList<string>> getMap(string[] input)
     {
