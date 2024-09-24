@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using advent_of_code_2017;
+﻿using advent_of_code_2017;
 
 namespace advent_of_code_2023.Day09;
 internal class Day09 : AdventSolution
 {
-    protected override long part1Work(string[] input)
+    protected override long part1Work(string[] input) =>
+        work(input, new Forward());
+
+    private long work(
+        string[] input,
+        IDirection direction)
     {
         var readings = parseInput(input);
 
@@ -17,6 +17,7 @@ internal class Day09 : AdventSolution
         foreach (var reading in readings)
         {
             var nextValue = takeDerivative(
+                direction,
                 reading,
                 new List<IList<long>>(),
                 0);
@@ -27,6 +28,7 @@ internal class Day09 : AdventSolution
     }
 
     private long takeDerivative(
+        IDirection direction,
         IList<long> reading,
         IList<IList<long>> derivations,
         int level)
@@ -43,11 +45,13 @@ internal class Day09 : AdventSolution
             rateOfChange.Add(change);
         }
 
-        var fromLower = takeDerivative(rateOfChange, derivations, level + 1);
+        var fromLower = takeDerivative(
+            direction,
+            rateOfChange,
+            derivations,
+            level + 1);
 
-        var next = fromLower + derivations[level].Last();
-
-        derivations[level].Add(next);
+        var next = direction.AddNumber(derivations[level], fromLower);
 
         return next;
     }
@@ -68,11 +72,10 @@ internal class Day09 : AdventSolution
 
     protected override long part1ExampleExpected => 114;
     protected override long part1InputExpected => 1884768153;
-    protected override long part2Work(string[] input)
-    {
-        throw new NotImplementedException();
-    }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    protected override long part2Work(string[] input) =>
+        work(input, new Backward());
+
+    protected override long part2ExampleExpected => 2;
+    protected override long part2InputExpected => 1031;
 }
