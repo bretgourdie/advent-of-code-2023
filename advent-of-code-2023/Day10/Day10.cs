@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 using advent_of_code_2017;
 
 namespace advent_of_code_2023.Day10;
 internal class Day10 : AdventSolution
 {
+    private enum AnswerStrategy
+    {
+        Depth,
+        Enclosure
+    }
+
     private enum Direction
     {
         North,
@@ -41,7 +42,12 @@ internal class Day10 : AdventSolution
         { Direction.East, Direction.West }
     };
 
-    protected override long part1Work(string[] input)
+    protected override long part1Work(string[] input) =>
+        work(input, AnswerStrategy.Depth);
+
+    private long work(
+        string[] input,
+        AnswerStrategy answerStrategy)
     {
         IList<Vector2> points = new List<Vector2>() { findStart(input) };
         var grid = getFillableGrid(input);
@@ -52,7 +58,31 @@ internal class Day10 : AdventSolution
             steps += 1;
         }
 
-        return steps - 1;
+        if (answerStrategy == AnswerStrategy.Depth)
+        {
+            return steps - 1;
+        }
+
+        var enclosed = findEnclosed(input, grid);
+
+        return enclosed;
+    }
+
+    private long findEnclosed(
+        string[] input,
+        long[][] grid)
+    {
+        for (int y = 0; y < grid.Length; y++)
+        {
+            for (int x = 0; x < grid[y].Length; x++)
+            {
+                if (!(x == 0 || y == 0 || y == grid.Length - 1 || x == grid[y].Length - 1)) continue;
+
+
+            }
+        }
+
+        throw new NotImplementedException();
     }
 
     private IList<Vector2> flood(
