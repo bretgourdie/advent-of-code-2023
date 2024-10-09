@@ -4,10 +4,8 @@ using advent_of_code_2017;
 namespace advent_of_code_2023.Day11;
 internal class Day11 : AdventSolution
 {
-    private const long part2ExpansionSize = 10;
-
     protected override long part1Work(string[] input) =>
-        work(input, 1);
+        work(input, 2);
     
     private long work(
         string[] input,
@@ -16,7 +14,7 @@ internal class Day11 : AdventSolution
         var rowExpansions = getRowExpansions(input);
         var columnExpansions = getColumnExpansions(input);
 
-        var shortestPaths = getShortestPaths(getGalaxyCoords(input), rowExpansions, columnExpansions, expansionSize);
+        var shortestPaths = getShortestPaths(getGalaxyCoords(input), rowExpansions, columnExpansions, expansionSize - 1);
 
         return shortestPaths.Sum();
     }
@@ -59,7 +57,7 @@ internal class Day11 : AdventSolution
         IList<Vector2> coords,
         IList<int> rowExpansions,
         IList<int> columnExpansions,
-        long expansionSize)
+        long spaceToAdd)
     {
         var pairs = generatePairs(coords);
         var dict = new Dictionary<string, long>();
@@ -81,9 +79,12 @@ internal class Day11 : AdventSolution
                 var rowsBetween = between(source.Y, target.Y, rowExpansions);
                 var columnsBetween = between(source.X, target.X, columnExpansions);
 
-                var distance = (long)(Math.Abs(target.X - source.X) + Math.Abs(target.Y - source.Y))
-                    + (long)rowsBetween * expansionSize
-                    + (long)columnsBetween * expansionSize;
+                var xDistance = (long)Math.Abs(target.X - source.X);
+                var yDistance = (long)Math.Abs(target.Y - source.Y);
+                var rowsSeparating = rowsBetween * spaceToAdd;
+                var columnsSeparating = columnsBetween * spaceToAdd;
+
+                var distance = xDistance + yDistance + rowsSeparating + columnsSeparating;
 
                 var pair = getPair(source, target);
                 dict[pair] = Math.Min(dict[pair], distance);
@@ -158,9 +159,9 @@ internal class Day11 : AdventSolution
     protected override long part1InputExpected => 9795148;
 
     protected override long part2Work(string[] input) =>
-        work(input, part2ExpansionSize);
+        work(input, 1_000_000);
 
-    protected override long part2ExampleExpected => -1;
+    protected override long part2ExampleExpected => 82000210;
 
-    protected override long part2InputExpected => -1;
+    protected override long part2InputExpected => 650672493820;
 }
