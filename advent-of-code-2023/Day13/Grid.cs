@@ -51,12 +51,12 @@ internal class Grid
         {
             bool symmetry = true;
 
-            for (int offset = 0; southOfLine - offset - 1 >= 0 && southOfLine + offset < rows; offset++)
+            for (int offset = 0; symmetry && southOfLine - offset - 1 >= 0 && southOfLine + offset < rows; offset++)
             {
                 var northLine = grid[southOfLine - offset - 1];
                 var southLine = grid[southOfLine + offset];
 
-                for (int letterIndex = 0; letterIndex < columns; letterIndex++)
+                for (int letterIndex = 0; symmetry && letterIndex < columns; letterIndex++)
                 {
                     symmetry &= northLine[letterIndex] == southLine[letterIndex];
                 }
