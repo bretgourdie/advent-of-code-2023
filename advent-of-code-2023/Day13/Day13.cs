@@ -1,21 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using advent_of_code_2017;
+﻿using advent_of_code_2017;
 
 namespace advent_of_code_2023.Day13;
 internal class Day13 : AdventSolution
 {
-    protected override long part1Work(string[] input)
+    protected override long part1Work(string[] input) =>
+        work(input, Grid.Smudging.No);
+
+    private long work(
+        string[] input,
+        Grid.Smudging smudingStrategy)
     {
         var grids = getGrids(input);
         long total = 0;
 
         foreach (var grid in grids)
         {
-            var result = grid.FindSymmetry();
+            var result = grid.FindSymmetry(smudingStrategy);
             total += result;
         }
 
@@ -53,11 +53,10 @@ internal class Day13 : AdventSolution
 
     protected override long part1ExampleExpected => 405;
     protected override long part1InputExpected => 29165;
-    protected override long part2Work(string[] input)
-    {
-        throw new NotImplementedException();
-    }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    protected override long part2Work(string[] input) =>
+        work(input, Grid.Smudging.Yes);
+
+    protected override long part2ExampleExpected => 400;
+    protected override long part2InputExpected => 32192;
 }
