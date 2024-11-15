@@ -27,9 +27,10 @@ internal class Day14 : AdventSolution
         char[][] input,
         Vector2 direction)
     {
-        for (int y = 0; y < input.Length; y++)
+
+        for (int y = start(input, direction); shouldContinue(y, end(input, direction), direction); y = increment(y, direction))
         {
-            for (int x = 0; x < input[y].Length; x++)
+            for (int x = start(input[y], direction); shouldContinue(x, end(input[y], direction), direction); x = increment(x, direction))
             {
                 var icon = input[y][x];
 
@@ -71,6 +72,39 @@ internal class Day14 : AdventSolution
         return input;
     }
 
+    private int start<T>(IList<T> list, Vector2 direction)
+    {
+        if (iterateForwards(direction)) return 0;
+
+        return list.Count - 1;
+    }
+
+    private int end<T>(IList<T> list, Vector2 direction)
+    {
+        if (iterateForwards(direction)) return list.Count;
+
+        return 0;
+    }
+
+    private bool shouldContinue(int current, int bound, Vector2 direction)
+    {
+        if (iterateForwards(direction)) return current < bound;
+
+        return current >= bound;
+    }
+
+    private int increment(int current, Vector2 direction)
+    {
+        if (iterateForwards(direction)) return current + 1;
+
+        return current - 1;
+    }
+
+    private bool iterateForwards(Vector2 direction)
+    {
+        return direction == north || direction == west;
+    }
+
     private long calculateLoad(char[][] rolled)
     {
         long result = 0;
@@ -96,9 +130,35 @@ internal class Day14 : AdventSolution
     protected override long part1InputExpected => 105784;
     protected override long part2Work(string[] input)
     {
-        throw new NotImplementedException();
+        const long totalIterations = 1000000000;
+        var array = input.To2DChar();
+
+        long i = 0;
+        var cycleDetector = new CycleDetector();
+
+        for (; i < totalIterations && !cycleDetector.CollisionDetected; i++)
+        {
+            rollRocks(array, north);
+            rollRocks(array, west);
+            rollRocks(array, south);
+            rollRocks(array, east);
+
+            cycleDetector.SaveState(array.ToStringRepresentation(), i);
+        }
+
+        i = cycleDetector.GetLastIteration(i, totalIterations);
+
+        for (; i < totalIterations; i++)
+        {
+            rollRocks(array, north);
+            rollRocks(array, west);
+            rollRocks(array, south);
+            rollRocks(array, east);
+        }
+
+        return calculateLoad(array);
     }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    protected override long part2ExampleExpected => 64;
+    protected override long part2InputExpected => 91286;
 }
