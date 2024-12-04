@@ -1,8 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using advent_of_code_2017;
-
-namespace advent_of_code_2023.Day01;
+﻿namespace advent_of_code_2023.Day01;
 
 internal class Day01 : AdventSolution
 {

@@ -1,6 +1,4 @@
-﻿using advent_of_code_2017;
-
-namespace advent_of_code_2023.Day09;
+﻿namespace advent_of_code_2023.Day09;
 internal class Day09 : AdventSolution
 {
     protected override long part1Work(string[] input) =>

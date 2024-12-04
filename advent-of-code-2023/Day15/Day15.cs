@@ -1,6 +1,4 @@
-﻿using advent_of_code_2017;
-
-namespace advent_of_code_2023.Day15;
+﻿namespace advent_of_code_2023.Day15;
 internal class Day15 : AdventSolution
 {
     private const string removeCommand = "-";

@@ -1,5 +1,4 @@
-﻿using advent_of_code_2017;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace advent_of_code_2023.Day03;
 internal class Day03 : AdventSolution

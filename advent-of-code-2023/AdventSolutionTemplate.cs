@@ -1,16 +1,15 @@
 using System.Reflection;
-using NUnit.Framework;
 
-namespace advent_of_code_2017;
+namespace advent_of_code_2023;
 
 public abstract class AdventSolutionTemplate<TPart1, TPart2>
 {
     private const string example = "example";
     private const string input = "input";
 
-    private Assembly executingAssembly;
-    private IList<string> manifestResourceNames;
-    private string currentNamespace;
+    private Assembly? executingAssembly;
+    private IList<string>? manifestResourceNames = null;
+    private string? currentNamespace;
 
     [SetUp]
     public void SetUp()
@@ -89,16 +88,17 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
 
     private string[] getInput(string file)
     {
+        if (executingAssembly == null) throw new NullReferenceException("Executing Assembly is null");
+
         var stream = executingAssembly.GetManifestResourceStream(getEmbeddedFilename(file));
         Assert.That(stream, Is.Not.Null);
 
         var lines = new List<string>();
-        using (var reader = new StreamReader(stream))
+        using (var reader = new StreamReader(stream!))
         {
-            string line;
-            while ((line = reader.ReadLine()) != null)
+            while (reader.Peek() >= 0)
             {
-                lines.Add(line);
+                lines.Add(reader.ReadLine()!);
             }
         }
 
@@ -115,5 +115,5 @@ public abstract class AdventSolutionTemplate<TPart1, TPart2>
     }
 
     private bool embeddedFileExists(string file) =>
-        manifestResourceNames.Contains(getEmbeddedFilename(file));
+        manifestResourceNames!.Contains(getEmbeddedFilename(file));
 }

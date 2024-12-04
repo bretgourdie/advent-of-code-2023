@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using advent_of_code_2017;
+﻿using System.Numerics;
 
 namespace advent_of_code_2023.Day14;
 internal class Day14 : AdventSolution

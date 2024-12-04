@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using advent_of_code_2017;
-
-namespace advent_of_code_2023.Day06;
+﻿namespace advent_of_code_2023.Day06;
 internal class Day06 : AdventSolution
 {
     protected override long part1Work(string[] input) =>
