@@ -7,14 +7,9 @@ internal class Day14 : AdventSolution
     private const char space = '.';
     private const char cube = '#';
 
-    private Vector2 north = new Vector2(0, -1);
-    private Vector2 south = new Vector2(0, 1);
-    private Vector2 east = new Vector2(1, 0);
-    private Vector2 west = new Vector2(-1, 0);
-
     protected override long part1Work(string[] input)
     {
-        return calculateLoad(rollRocks(input.To2DChar(), north));
+        return calculateLoad(rollRocks(input.To2DChar(), Direction.North));
     }
 
     private char[][] rollRocks(
@@ -96,7 +91,7 @@ internal class Day14 : AdventSolution
 
     private bool iterateForwards(Vector2 direction)
     {
-        return direction == north || direction == west;
+        return direction == Direction.North || direction == Direction.West;
     }
 
     private long calculateLoad(char[][] rolled)
@@ -132,11 +127,7 @@ internal class Day14 : AdventSolution
 
         for (; i < totalIterations && !cycleDetector.CollisionDetected; i++)
         {
-            rollRocks(array, north);
-            rollRocks(array, west);
-            rollRocks(array, south);
-            rollRocks(array, east);
-
+            spinCycle(array);
             cycleDetector.SaveState(array.ToStringRepresentation(), i);
         }
 
@@ -144,13 +135,18 @@ internal class Day14 : AdventSolution
 
         for (; i < totalIterations; i++)
         {
-            rollRocks(array, north);
-            rollRocks(array, west);
-            rollRocks(array, south);
-            rollRocks(array, east);
+            spinCycle(array);
         }
 
         return calculateLoad(array);
+    }
+
+    private void spinCycle(char[][] array)
+    {
+        rollRocks(array, Direction.North);
+        rollRocks(array, Direction.West);
+        rollRocks(array, Direction.South);
+        rollRocks(array, Direction.East);
     }
 
     protected override long part2ExampleExpected => 64;
