@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using System.Text;
 
 namespace advent_of_code_2023.Day16;
 internal class Day16 : AdventSolution
