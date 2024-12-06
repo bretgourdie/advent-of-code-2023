@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Numerics;
 
 namespace advent_of_code_2023.Day16;
 internal class Beam
@@ -93,12 +86,12 @@ internal class Beam
         {
             if (travelDirection.IsYAxis())
             {
-                return Direction.NextClockwise(travelDirection);
+                return travelDirection.NextClockwise();
             }
 
             else
             {
-                return Direction.NextCounterClockwise(travelDirection);
+                return travelDirection.NextCounterClockwise();
             }
         }
 
@@ -106,12 +99,12 @@ internal class Beam
         {
             if (travelDirection.IsYAxis())
             {
-                return Direction.NextCounterClockwise(travelDirection);
+                return travelDirection.NextCounterClockwise();
             }
 
             else
             {
-                return Direction.NextClockwise(travelDirection);
+                return travelDirection.NextClockwise();
             }
         }
 
