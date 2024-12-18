@@ -1,14 +1,18 @@
 ﻿using System.Numerics;
-using System.Reflection.Metadata.Ecma335;
 
 namespace advent_of_code_2023.Day17;
 internal class Day17 : AdventSolution
 {
-    protected override long part1Work(string[] input)
+    protected override long part1Work(string[] input) =>
+        work(input, new StepConstraint(0, 3));
+
+    private long work(
+        string[] input,
+        StepConstraint constraint)
     {
         var cityBlock = input.To2DChar();
 
-        var leastHeatLoss = findLeastHeatLoss(cityBlock);
+        var leastHeatLoss = findLeastHeatLoss(cityBlock, constraint);
 
         return leastHeatLoss;
     }
@@ -18,7 +22,9 @@ internal class Day17 : AdventSolution
         return new Vector2(cityBlock[0].Length - 1, cityBlock.Length - 1);
     }
 
-    private long findLeastHeatLoss(char[][] cityBlock)
+    private long findLeastHeatLoss(
+        char[][] cityBlock,
+        StepConstraint constraint)
     {
         IDictionary<State, long> stateAndCost = new Dictionary<State, long>();
         var toVisit = new PriorityQueue<State, long>();
@@ -31,16 +37,21 @@ internal class Day17 : AdventSolution
 
         while (toVisit.Count > 0)
         {
+            toVisit.TryDequeue(out State lowest, out long lowestCost);
+
+            if (lowest.Position == target && checkFinalSteps(lowest, constraint))
+            {
+                targetStatesFound.Enqueue(lowest, lowestCost);
+            }
+
             if (noBetter(targetStatesFound, toVisit, out long best))
             {
                 return best;
             }
 
-            toVisit.TryDequeue(out State lowest, out long lowestCost);
-
             foreach (var direction in Direction.Clockwise)
             {
-                if (!shouldExplore(lowest, direction, cityBlock)) continue;
+                if (!shouldExplore(lowest, direction, cityBlock, constraint)) continue;
 
                 var newCost = lowestCost + getCost(lowest, direction, cityBlock);
                 var steps = getNextStep(lowest, direction);
@@ -50,9 +61,7 @@ internal class Day17 : AdventSolution
                     newState,
                     newCost,
                     stateAndCost,
-                    toVisit,
-                    target,
-                    targetStatesFound);
+                    toVisit);
             }
         }
 
@@ -63,9 +72,7 @@ internal class Day17 : AdventSolution
         State newState,
         long newCost,
         IDictionary<State, long> stateAndCost,
-        PriorityQueue<State, long> toVisit,
-        Vector2 target,
-        PriorityQueue<State, long> targetStates)
+        PriorityQueue<State, long> toVisit)
     {
         if (stateAndCost.TryGetValue(newState, out long existingCost))
         {
@@ -75,9 +82,7 @@ internal class Day17 : AdventSolution
                     newState,
                     newCost,
                     stateAndCost,
-                    toVisit,
-                    target,
-                    targetStates);
+                    toVisit);
             }
         }
 
@@ -87,9 +92,7 @@ internal class Day17 : AdventSolution
                 newState,
                 newCost,
                 stateAndCost,
-                toVisit,
-                target,
-                targetStates);
+                toVisit);
         }
     }
 
@@ -97,27 +100,21 @@ internal class Day17 : AdventSolution
         State newState,
         long newCost,
         IDictionary<State, long> stateAndCost,
-        PriorityQueue<State, long> toVisit,
-        Vector2 target,
-        PriorityQueue<State, long> targetStates)
+        PriorityQueue<State, long> toVisit)
     {
         stateAndCost[newState] = newCost;
         toVisit.Enqueue(newState, newCost);
-
-        if (newState.Position == target)
-        {
-            targetStates.Enqueue(newState, newCost);
-        }
     }
 
     private bool shouldExplore(
         State lowest,
         Vector2 direction,
-        char[][] cityBlock)
+        char[][] cityBlock,
+        StepConstraint constraint)
     {
         return !backwards(lowest, direction)
                && inBounds(lowest, direction, cityBlock)
-               && threeOrLessBlocks(lowest, direction);
+               && acceptableNumberOfSteps(lowest, direction, constraint);
     }
 
     private bool noBetter(
@@ -165,80 +162,29 @@ internal class Day17 : AdventSolution
         return state.Direction == direction.Opposite();
     }
 
-    private bool threeOrLessBlocks(
+    private bool checkFinalSteps(
         State state,
-        Vector2 direction)
+        StepConstraint constraint)
     {
-        if (state.Direction == direction)
-        {
-            return state.StepsInDirection < 3;
-        }
-
-        return true;
+        return constraint.Min <= state.StepsInDirection
+            && state.StepsInDirection < constraint.Max;
     }
 
-    private void printPath(
-        State target,
-        IDictionary<State, State> stateToParent,
-        char[][] cityBlock)
+    private bool acceptableNumberOfSteps(
+        State state,
+        Vector2 direction,
+        StepConstraint constraint)
     {
-        var s = new Dictionary<Vector2, string>();
-        var u = stateToParent[target];
+        if (state.Direction == Direction.None) return true;
 
-        while (stateToParent.ContainsKey(u))
+        if (state.Direction == direction)
         {
-            var direction = ".";
-            var prev = stateToParent[u];
-            if (prev.Position + Direction.North == u.Position)
-            {
-                direction = "^";
-            }
-            else if (prev.Position + Direction.South == u.Position)
-            {
-                direction = "V";
-            }
-            else if (prev.Position + Direction.East == u.Position)
-            {
-                direction = ">";
-            }
-            else if (prev.Position + Direction.West == u.Position)
-            {
-                direction = "<";
-            }
-
-            s.Add(u.Position, direction);
-            u = stateToParent[u];
+            return state.StepsInDirection < constraint.Max;
         }
 
-        for (int y = 0; y < cityBlock.Length; y++)
+        else
         {
-            for (int x = 0; x < cityBlock[y].Length; x++)
-            {
-                Console.Write(cityBlock[y][x].ToString());
-            }
-
-            Console.WriteLine();
-        }
-
-        Console.WriteLine("---------------");
-
-        for (int y = 0; y < cityBlock.Length; y++)
-        {
-            for (int x = 0; x < cityBlock[y].Length; x++)
-            {
-                var position = new Vector2(x, y);
-                if (s.TryGetValue(position, out string direction))
-                {
-                    Console.Write(direction);
-                }
-
-                else
-                {
-                    Console.Write(cityBlock[y][x].ToString());
-                }
-            }
-
-            Console.WriteLine();
+            return constraint.Min <= state.StepsInDirection;
         }
     }
 
@@ -266,13 +212,24 @@ internal class Day17 : AdventSolution
             0 <= x && x < cityBlock[y].Length;
     }
 
-    protected override long part1ExampleExpected => 102;
-    protected override long part1InputExpected => 907;
-    protected override long part2Work(string[] input)
+    private struct StepConstraint
     {
-        throw new NotImplementedException();
+        public readonly int Min;
+        public readonly int Max;
+
+        public StepConstraint(int min, int max)
+        {
+            Min = min;
+            Max = max;
+        }
     }
 
-    protected override long part2ExampleExpected { get; }
-    protected override long part2InputExpected { get; }
+    protected override long part1ExampleExpected => 102;
+    protected override long part1InputExpected => 907;
+
+    protected override long part2Work(string[] input) =>
+        work(input, new StepConstraint(4, 10));
+
+    protected override long part2ExampleExpected => 94;
+    protected override long part2InputExpected => 1057;
 }
