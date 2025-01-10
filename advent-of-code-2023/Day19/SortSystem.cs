@@ -1,0 +1,46 @@
+﻿namespace advent_of_code_2023.Day19;
+internal class SortSystem
+{
+    private readonly IDictionary<string, Workflow> workflows;
+
+    public SortSystem(IList<string> workflowInput)
+    {
+        workflows = new Dictionary<string, Workflow>();
+
+        foreach (var line in workflowInput)
+        {
+            var split = line.Split('{');
+
+            var rules = new Workflow(split[1]);
+
+            workflows.Add(split[0], rules);
+        }
+    }
+
+    public bool Accept(Part part)
+    {
+        var workflowName = "in";
+
+        while (true)
+        {
+            var result = workflows[workflowName].Evaluate(part);
+
+            if (result.Accepted)
+            {
+                return true;
+            }
+
+            else if (result.Rejected)
+            {
+                return false;
+            }
+
+            else
+            {
+                workflowName = result.Workflow;
+            }
+        }
+
+        throw new ArgumentException("Cannot sort part", nameof(part));
+    }
+}
