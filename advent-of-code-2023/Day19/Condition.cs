@@ -6,15 +6,12 @@ internal class Condition
     public readonly Operation TheOperation;
     public readonly long Value;
     public readonly string Resultant;
-    public readonly bool HasCondition;
 
     private const char conditionAndResultantSplitter = ':';
 
     public Condition(string equationAndResultant)
     {
-        HasCondition = equationAndResultant.Contains(conditionAndResultantSplitter);
-
-        if (HasCondition)
+        if (equationAndResultant.Contains(conditionAndResultantSplitter))
         {
             var split = equationAndResultant.Split(conditionAndResultantSplitter);
             Equation = split[0];
@@ -27,28 +24,35 @@ internal class Condition
 
         else
         {
+            Attribute = String.Empty;
+            Equation = String.Empty;
+            TheOperation = Operation.None;
             Resultant = equationAndResultant;
         }
     }
 
     public bool Evaluate(Part part)
     {
-        if (!HasCondition) return true;
-
         if (TheOperation == Operation.LessThan)
         {
             return part.Attributes[Attribute] < Value;
         }
 
-        else
+        else if (TheOperation == Operation.GreaterThan)
         {
             return part.Attributes[Attribute] > Value;
+        }
+
+        else
+        {
+            return true;
         }
     }
 
     public enum Operation
     {
         GreaterThan,
-        LessThan
+        LessThan,
+        None
     }
 }

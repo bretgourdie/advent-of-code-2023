@@ -54,11 +54,9 @@ internal class Day19 : AdventSolution
 
     protected override long part1ExampleExpected => 19114;
     protected override long part1InputExpected => 391132;
-    protected override long part2Work(string[] input)
-    {
-        throw new NotImplementedException();
-    }
+    protected override long part2Work(string[] input) =>
+        new SortSystem(getWorkflowLines(input)).GetCombinations();
 
-    protected override long part2ExampleExpected { get; }
+    protected override long part2ExampleExpected => 167409079868000;
     protected override long part2InputExpected { get; }
 }
